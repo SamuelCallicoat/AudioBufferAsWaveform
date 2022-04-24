@@ -1,12 +1,14 @@
-const SAMPLE_RATE = 8000;
+const SAMPLE_RATE = 48000;
 const HZ_440_NUM_SAMPLES_FLOORED = Math.floor(SAMPLE_RATE / 440);
 let volume;
 let audioCtx;
 let audioCtxBtn = document.getElementById('audioCtxBtn');
 let waveshapeBtn = document.getElementById('waveshapeBtn');
+let detuneSlider = document.getElementById('detuneSlider');
 let audioBufferNode;
 let waveshapeChoice = 1;
 let bufferArray;
+let bufferSourceNode;
 
 audioCtxBtn.addEventListener('click', () => {
   if (audioCtx instanceof AudioContext) return;
@@ -17,7 +19,7 @@ audioCtxBtn.addEventListener('click', () => {
 
   audioBufferNode = CreateWaveLengthBuffer();
 
-  let bufferSourceNode = audioCtx.createBufferSource();
+  bufferSourceNode = audioCtx.createBufferSource();
   bufferSourceNode.loop = true;
 
   let gainNode = audioCtx.createGain();
@@ -54,6 +56,7 @@ waveshapeBtn.addEventListener('click', () => {
   if (audioCtx instanceof AudioContext) {
     switch (waveshapeChoice) {
       case 1:
+        /// Square Wave
         for (let i = 0; i < bufferArray.length; i++) {
           if (i < HZ_440_NUM_SAMPLES_FLOORED * 0.5) bufferArray[i] = 1;
           else bufferArray[i] = -1;
@@ -62,6 +65,7 @@ waveshapeBtn.addEventListener('click', () => {
         break;
 
       case 2:
+        /// Ramp Wave
         for (let i = 0; i < bufferArray.length; i++) {
           bufferArray[i] = i / HZ_440_NUM_SAMPLES_FLOORED;
         }
@@ -70,6 +74,7 @@ waveshapeBtn.addEventListener('click', () => {
         break;
 
       default:
+        /// Sine Wave
         for (let i = 0; i < bufferArray.length; i++) {
           bufferArray[i] = Math.sin(
             (i / HZ_440_NUM_SAMPLES_FLOORED) * Math.PI * 2
@@ -81,4 +86,10 @@ waveshapeBtn.addEventListener('click', () => {
         break;
     }
   }
+});
+
+detuneSlider.addEventListener('change', (slider) => {
+  if (!(audioCtx instanceof AudioContext)) return;
+  console.log(slider.target.value);
+  bufferSourceNode.detune.value = slider.target.value;
 });
